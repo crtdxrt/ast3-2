@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Created with GameMaker: Studio</title>
+    <style>
+        body { 
+            background: #000; 
+            color: #ccc; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden;
+        }
+        canvas { 
+            display: block; 
+            width: 100vw; 
+            height: 100vh; 
+            image-rendering: pixelated; /* keeps it crispy */
+        }
+        #click-to-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            padding: 20px 40px;
+            border-radius: 10px;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 9999;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="click-to-play">
+        <b>CLICK HERE IF KEYS DON'T WORK<br><span style="font-size:14px;">(gives the game focus)</span></b>
+    </div>
+
+    <div class="gm4html5_div_class" id="gm4html5_div_id">
+        <canvas id="canvas" width="1024" height="375">
+            <p>Your browser doesn't support HTML5 canvas.</p>
+        </canvas>
+    </div>
+
+    <!-- Game script -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/bessiegasbarro/Rocked@8d9f4127e770f8d22db3153c305916ccf3ceb9f8/Rl2D.js"></script>
+    <script>
+        window.onload = GameMaker_Init;
+
+        // fix keyboard focus when people click the text
+        document.getElementById('click-to-play').addEventListener('click', function(e) {
+            document.getElementById('canvas').focus();
+            this.style.display = 'none'; // hide the message after click
+        });
+    </script>
+</body>
+</html>

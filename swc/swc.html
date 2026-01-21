@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>Construct 2 Game</title>
+
+	<!-- Optional favicon -->
+	<link rel="icon" type="image/png" href="favicon.png">
+
+	<!-- Ruffle / Offline Client -->
+	<script src="https://cdn.jsdelivr.net/gh/bubbls/ruffle@a25d711e6294241dd4ad89f5ef65dc6bf34fcb24/offlineclient.js"></script>
+
+	<style>
+		/* Hide legacy button */
+		#button {
+			display: none;
+		}
+
+		/* Image animation */
+		.imgb_vis {
+			animation: imgb-animation 7s linear;
+		}
+
+		@keyframes imgb-animation {
+			10% { transform: translateX(0); }
+			20% { transform: translateX(100px); }
+			90% { transform: translateX(100px); }
+			100% { transform: translateX(0); }
+		}
+
+		/* Basic page reset */
+		html, body {
+			margin: 0;
+			padding: 0;
+			background: #000;
+			color: #fff;
+			font-family: Arial, Helvetica, sans-serif;
+			overflow: hidden;
+		}
+
+		/* Canvas container */
+		#c2canvasdiv {
+			margin: 0 auto;
+			display: block;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="fb-root"></div>
+
+	<script>
+		// Warn if opened locally
+		(function () {
+			if (window.location.protocol.substr(0, 4) === "file") {
+				alert(
+					"Exported games won't work until you upload them.\n\n" +
+					"Browsers block many features when running from file:///"
+				);
+			}
+		})();
+	</script>
+
+	<!-- Canvas container (REQUIRED name: c2canvasdiv) -->
+	<div id="c2canvasdiv" style="width:1629px; height:931px;">
+		<canvas
+			id="c2canvas"
+			width="1629"
+			height="931"
+			style="width:1629px; height:931px;"
+		>
+			<h1>
+				Your browser does not support HTML5.<br><br>
+				<a href="https://www.google.com/chrome/">Google Chrome</a><br>
+				<a href="https://www.mozilla.org/firefox/">Mozilla Firefox</a><br>
+				<a href="https://www.apple.com/safari/">Apple Safari</a>
+			</h1>
+		</canvas>
+	</div>
+
+	<!-- REQUIRED: jQuery for Construct 2 -->
+	<script src="https://cdn.jsdelivr.net/gh/bubbls/ruffle@a25d711e6294241dd4ad89f5ef65dc6bf34fcb24/2.1min.js"></script>
+
+	<!-- REQUIRED: Construct 2 runtime -->
+	<script src="https://cdn.jsdelivr.net/gh/bubbls/ruffle@a25d711e6294241dd4ad89f5ef65dc6bf34fcb24/runtime.js"></script>
+
+	<script>
+		// Start Construct 2 runtime
+		jQuery(document).ready(function () {
+			cr_createRuntime("c2canvas");
+		});
+
+		// Pause when tab is hidden
+		function onVisibilityChanged() {
+			if (
+				document.hidden ||
+				document.mozHidden ||
+				document.webkitHidden ||
+				document.msHidden
+			) {
+				cr_setSuspended(true);
+			} else {
+				cr_setSuspended(false);
+			}
+		}
+
+		document.addEventListener("visibilitychange", onVisibilityChanged);
+		document.addEventListener("mozvisibilitychange", onVisibilityChanged);
+		document.addEventListener("webkitvisibilitychange", onVisibilityChanged);
+		document.addEventListener("msvisibilitychange", onVisibilityChanged);
+
+		function OnRegisterSWError(e) {
+			console.warn("Service worker registration failed:", e);
+		}
+
+		// Offline caching (sw.js must exist)
+		window.C2_RegisterSW = function () {
+			if (!navigator.serviceWorker) return;
+
+			try {
+				navigator.serviceWorker
+					.register("sw.js", { scope: "./" })
+					.then(function (reg) {
+						console.log("Service worker registered:", reg.scope);
+					})
+					.catch(OnRegisterSWError);
+			} catch (e) {
+				OnRegisterSWError(e);
+			}
+		};
+	</script>
+</body>
+</html>

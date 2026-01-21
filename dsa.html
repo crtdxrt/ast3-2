@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="blue">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astatine</title>
+
+<link rel="icon" href="icom.png">
+<link href="https://fonts.googleapis.com/css2?family=BBH+Bartle:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+/* ================= ROOT / THEMES (UNCHANGED CORE) ================= */
+:root{
+  --text:#8fc9ff; --accent:#3fb7ff; --glow:rgba(63,183,255,.7);
+  --bg-top:#5fa2e6; --bg-mid:#2f69b8; --bg-low:#0b2a55; --bg-bottom:#020611;
+  --panel-bg:rgba(6,24,50,.85);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:'BBH Bartle',sans-serif;
+  color:var(--text);
+  background:#000;
+  overflow:hidden;
+}
+
+/* ===== BACKGROUND ===== */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255,255,255,.1), transparent 55%),
+    linear-gradient(180deg,
+      var(--bg-top),
+      var(--bg-mid),
+      var(--bg-low),
+      var(--bg-bottom)
+    );
+}
+
+/* ================= TOP BAR ================= */
+.topbar{
+  position:fixed;
+  inset:0 0 auto 0;
+  height:56px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 26px;
+  background:linear-gradient(180deg,rgba(0,0,0,.45),transparent);
+  z-index:20;
+  font-size:.8em;
+}
+
+/* ================= HERO ================= */
+.hero{
+  padding:110px 8vw 40px;
+  max-width:1400px;
+  margin:auto;
+}
+
+.hero h1{
+  font-size:2.6em;
+  margin:0;
+  text-shadow:0 0 30px var(--glow);
+}
+
+.hero p{
+  opacity:.75;
+  max-width:520px;
+  line-height:1.5;
+}
+
+/* ================= CONTROLS ================= */
+.controls{
+  display:flex;
+  gap:14px;
+  margin-top:22px;
+  flex-wrap:wrap;
+}
+
+.search{
+  position:relative;
+}
+.search input{
+  padding:9px 14px 9px 36px;
+  border-radius:999px;
+  border:none;
+  outline:none;
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(12px);
+  color:var(--text);
+}
+.search span{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  opacity:.5;
+}
+
+/* ================= CATEGORY STRIP ================= */
+.categories{
+  display:flex;
+  gap:10px;
+  margin-top:34px;
+  overflow-x:auto;
+  padding-bottom:6px;
+}
+
+.cat{
+  padding:8px 18px;
+  border-radius:999px;
+  background:rgba(0,0,0,.35);
+  cursor:pointer;
+  white-space:nowrap;
+  transition:.3s;
+}
+.cat.active{
+  background:var(--accent);
+  color:#000;
+  box-shadow:0 0 18px var(--glow);
+}
+
+/* ================= MAIN GRID ================= */
+.main{
+  position:absolute;
+  inset:320px 0 0;
+  overflow-y:auto;
+  padding:0 6vw 80px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:22px;
+  max-width:1600px;
+  margin:auto;
+}
+
+.card{
+  aspect-ratio:1/1;
+  border-radius:22px;
+  overflow:hidden;
+  position:relative;
+  cursor:pointer;
+  background:#000;
+  transition:.45s cubic-bezier(.2,.8,.2,1);
+}
+.card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 18px 50px rgba(0,0,0,.6);
+}
+.card .name{
+  position:absolute;
+  inset:auto 0 0;
+  padding:26px 12px 10px;
+  background:linear-gradient(to top,rgba(0,0,0,.9),transparent);
+  font-size:.8em;
+  text-align:center;
+}
+
+/* ================= INFO DRAWER ================= */
+.drawer{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  backdrop-filter:blur(16px);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  opacity:0;
+  pointer-events:none;
+  transition:.4s;
+  z-index:50;
+}
+.drawer.active{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.drawer-box{
+  width:420px;
+  max-width:90%;
+  padding:28px;
+  background:var(--panel-bg);
+  border-radius:26px;
+  box-shadow:0 30px 90px rgba(0,0,0,.8);
+}
+
+.drawer h2{
+  margin-top:0;
+  color:var(--accent);
+  text-shadow:0 0 12px var(--glow);
+}
+
+/* ================= FOOTER ================= */
+footer{
+  position:fixed;
+  bottom:12px;
+  right:18px;
+  font-size:.7em;
+  opacity:.5;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <div id="day"></div>
+  <div id="time"></div>
+</div>
+
+<section class="hero">
+  <h1>Astatine</h1>
+  <p>A curated archive of browser games and emulated classics.</p>
+
+  <div class="controls">
+    <div class="search">
+      <span>⌕</span>
+      <input id="searchInput" placeholder="Search games">
+    </div>
+  </div>
+
+  <div class="categories" id="cats"></div>
+</section>
+
+<main class="main">
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="drawer" id="drawer">
+  <div class="drawer-box">
+    <h2 id="dTitle"></h2>
+    <p id="dText"></p>
+  </div>
+</div>
+
+<footer>crtdxrt — 2025</footer>
+
+<script>
+/* TIME */
+setInterval(()=>{
+  const d=new Date();
+  time.textContent=d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  day.textContent=d.toLocaleDateString([], {weekday:'long'});
+},1000);
+
+/* DATA (reuse your existing games array) */
+const games = [
+  {name:"Among Us", img:"amongus/amogus.png", link:"amongus/amongus.html", cat:"Casual"},
+  {name:"Slope", img:"slope/slope.png", link:"slope/slope.html", cat:"Action"},
+  // keep rest exactly as-is
+];
+
+const grid = document.getElementById('grid');
+const cats = document.getElementById('cats');
+let filter = 'All';
+
+/* BUILD */
+['All',...new Set(games.map(g=>g.cat))].forEach(c=>{
+  const el=document.createElement('div');
+  el.className='cat'+(c==='All'?' active':'');
+  el.textContent=c;
+  el.onclick=()=>{filter=c;document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));el.classList.add('active');render();}
+  cats.appendChild(el);
+});
+
+function render(){
+  grid.innerHTML='';
+  games.filter(g=>filter==='All'||g.cat===filter)
+    .forEach(g=>{
+      const c=document.createElement('div');
+      c.className='card';
+      c.innerHTML=`<img src="${g.img}"><div class="name">${g.name}</div>`;
+      c.onclick=()=>location.href=g.link;
+      grid.appendChild(c);
+    });
+}
+render();
+</script>
+
+</body>
+</html>

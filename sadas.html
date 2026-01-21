@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>8-Bit Knight Quest</title>
+    <style>
+        body {
+            background-color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            image-rendering: pixelated; /* Keeps pixels sharp */
+        }
+        canvas {
+            border: 4px solid #fff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="256" height="240"></canvas>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // NES Resolution: 256x240
+    // Tile size: 16x16
+    const TILE_SIZE = 16;
+    const GRID_WIDTH = 16;
+    const GRID_HEIGHT = 15;
+
+    // Game State
+    const player = {
+        x: 1,
+        y: 1,
+        color: '#f0d0b0', // Knight skin tone
+        armor: '#888',    // Knight silver
+        isMoving: false
+    };
+
+    // Simple Map (1 = Wall/Mountain, 0 = Grass)
+    const worldMap = [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,1,0,0,1,1,1,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,1,0,1,0,0,0,1,0,1],
+        [1,0,1,1,1,0,0,0,0,0,0,0,1,1,0,1],
+        [1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1],
+        [1,1,1,0,1,1,1,1,0,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,0,0,1,1,1,1,1,0,1],
+        [1,0,1,0,0,0,1,0,0,1,0,0,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,0,0,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Map
+        for (let row = 0; row < GRID_HEIGHT; row++) {
+            for (let col = 0; col < GRID_WIDTH; col++) {
+                if (worldMap[row][col] === 1) {
+                    // Draw "Wall/Mountain" (Stone Blue)
+                    ctx.fillStyle = '#444466';
+                    ctx.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    ctx.strokeStyle = '#222233';
+                    ctx.strokeRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                } else {
+                    // Draw "Grass" (Dark Green)
+                    ctx.fillStyle = '#225522';
+                    ctx.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                }
+            }
+        }
+
+        // Draw Player (The Knight)
+        const px = player.x * TILE_SIZE;
+        const py = player.y * TILE_SIZE;
+
+        // Helmet/Body
+        ctx.fillStyle = player.armor;
+        ctx.fillRect(px + 2, py + 2, 12, 12);
+        // Eye Slit
+        ctx.fillStyle = '#000';
+        ctx.fillRect(px + 4, py + 5, 8, 2);
+        // Plume (Red)
+        ctx.fillStyle = '#A00';
+        ctx.fillRect(px + 6, py, 4, 2);
+    }
+
+    // Input Handling
+    window.addEventListener('keydown', (e) => {
+        let newX = player.x;
+        let newY = player.y;
+
+        if (e.key === 'ArrowUp') newY--;
+        if (e.key === 'ArrowDown') newY++;
+        if (e.key === 'ArrowLeft') newX--;
+        if (e.key === 'ArrowRight') newX++;
+
+        // Collision detection and "Choppy" Grid Movement
+        if (worldMap[newY] && worldMap[newY][newX] === 0) {
+            player.x = newX;
+            player.y = newY;
+        }
+        
+        draw();
+    });
+
+    // Initial Draw
+    draw();
+</script>
+</body>
+</html>

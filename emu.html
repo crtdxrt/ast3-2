@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Astatine — Emulator Core</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="icom.png">
+
+<!-- OG BARTLE FONT -->
+<link href="https://fonts.googleapis.com/css2?family=BBH+Bartle:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- RUFFLE (runtime only, no UI) -->
+<script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+
+<style>
+/* ================= ASTATINE THEME ================= */
+:root{
+  --text:#8fc9ff;
+  --accent:#3fb7ff;
+  --glow:rgba(63,183,255,.7);
+  --bg-top:#5fa2e6;
+  --bg-mid:#2f69b8;
+  --bg-low:#0b2a55;
+  --bg-bottom:#020611;
+  --panel-bg:rgba(6,24,50,.85);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:'BBH Bartle',sans-serif;
+  color:var(--text);
+  overflow:hidden;
+}
+
+/* Background */
+body::before,body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  z-index:-2;
+}
+body::before{
+  background:
+    radial-gradient(circle at 50% 12%,rgba(255,255,255,.1),transparent 55%),
+    linear-gradient(180deg,var(--bg-top),var(--bg-mid),var(--bg-low),var(--bg-bottom));
+}
+body::after{
+  background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.85));
+}
+
+/* ================= TOP ================= */
+.site-title{
+  position:fixed;
+  left:80px;
+  top:88px;
+  font-size:1.9em;
+  text-shadow:0 0 22px var(--glow);
+}
+.splash{
+  position:fixed;
+  left:80px;
+  top:132px;
+  font-size:.85em;
+  letter-spacing:.15em;
+  opacity:.85;
+}
+
+/* ================= EMULATOR ================= */
+.emu-shell{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.emu-screen{
+  position:relative;
+  background:#000;
+  border-radius:22px;
+  box-shadow:
+    0 0 60px var(--glow),
+    0 30px 80px rgba(0,0,0,.8);
+  overflow:hidden;
+  transition:
+    width .6s cubic-bezier(.2,.8,.2,1),
+    height .6s cubic-bezier(.2,.8,.2,1),
+    filter .4s;
+}
+
+.emu-screen.crt{
+  filter:contrast(1.05) saturate(1.1) blur(.25px);
+}
+
+.emu-screen.scanlines::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,.18) 0px,
+    rgba(0,0,0,.18) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  pointer-events:none;
+}
+
+.emu-content{
+  width:100%;
+  height:100%;
+  background:#000;
+}
+
+/* ================= PANELS ================= */
+.panel{
+  position:fixed;
+  bottom:22px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
+  z-index:10;
+}
+
+.panel button{
+  padding:9px 16px;
+  border-radius:14px;
+  border:none;
+  background:rgba(0,0,0,.45);
+  color:var(--text);
+  font-size:.75em;
+  cursor:pointer;
+  transition:.3s;
+}
+.panel button:hover{
+  box-shadow:0 0 18px var(--glow);
+}
+
+/* ================= FADE ================= */
+.fade{
+  position:fixed;
+  inset:0;
+  background:#000;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .6s;
+  z-index:999;
+}
+.fade.active{opacity:1}
+
+/* Hidden file input */
+input[type=file]{display:none}
+</style>
+</head>
+
+<body>
+
+<div class="site-title">Astatine</div>
+<div class="splash" id="status">NO FILE LOADED</div>
+
+<div class="emu-shell">
+  <div class="emu-screen" id="screen">
+    <div class="emu-content" id="content"></div>
+  </div>
+</div>
+
+<div class="panel">
+  <button onclick="openFile()">LOAD FILE</button>
+  <button onclick="setAspect('4:3')">4:3</button>
+  <button onclick="setAspect('16:9')">16:9</button>
+  <button onclick="setRes(1280,720)">720p</button>
+  <button onclick="setRes(1920,1080)">1080p</button>
+  <button onclick="toggleCRT()">CRT</button>
+  <button onclick="toggleScan()">SCAN</button>
+</div>
+
+<div class="fade" id="fade"></div>
+<input type="file" id="fileInput" accept=".swf">
+
+<script>
+const screen = document.getElementById('screen');
+const content = document.getElementById('content');
+const fade = document.getElementById('fade');
+const status = document.getElementById('status');
+const fileInput = document.getElementById('fileInput');
+
+/* ===== DISPLAY CORE ===== */
+let baseW = 640;
+let baseH = 480;
+let aspect = '4:3';
+
+function applySize(){
+  let w = baseW, h = baseH;
+  if(aspect === '4:3') h = w * 3 / 4;
+  if(aspect === '16:9') h = w * 9 / 16;
+  screen.style.width = w + 'px';
+  screen.style.height = h + 'px';
+}
+
+function setAspect(a){ aspect = a; applySize(); }
+function setRes(w,h){ baseW = w; baseH = h; applySize(); }
+function toggleCRT(){ screen.classList.toggle('crt'); }
+function toggleScan(){ screen.classList.toggle('scanlines'); }
+
+/* ===== FILE LOADER ===== */
+function openFile(){
+  fileInput.click();
+}
+
+fileInput.onchange = () => {
+  const file = fileInput.files[0];
+  if(!file) return;
+
+  fade.classList.add('active');
+  status.textContent = 'LOADING ' + file.name.toUpperCase();
+
+  setTimeout(() => {
+    content.innerHTML = '';
+    const url = URL.createObjectURL(file);
+
+    const player = document.createElement('ruffle-player');
+    player.style.width = '100%';
+    player.style.height = '100%';
+    player.setAttribute('src', url);
+
+    content.appendChild(player);
+    fade.classList.remove('active');
+    status.textContent = 'RUNNING — ' + file.name.toUpperCase();
+  }, 550);
+};
+
+/* Init */
+applySize();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astatine</title>
+    <link rel="icon" type="image/png" href="icom.png">
+    <link href="https://fonts.googleapis.com/css2?family=BBH+Bartle:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ================= THEME VARIABLES ================= */
+        :root {
+            --text: #8fc9ff; --accent: #3fb7ff; --glow: rgba(63, 183, 255, 0.5);
+            --bg-top: #5fa2e6; --bg-mid: #2f69b8; --bg-low: #0b2a55; --bg-bottom: #020611;
+            --panel-bg: rgba(6, 24, 50, 0.9);
+        }
+        [data-theme="dark"] {
+            --text: #ffffff; --accent: #ffffff; --glow: rgba(255, 255, 255, 0.3);
+            --bg-top: #222; --bg-mid: #181818; --bg-low: #0f0f0f; --bg-bottom: #050505;
+            --panel-bg: rgba(20, 20, 20, 0.95);
+        }
+        [data-theme="midnight-pale"] {
+            --text: #dcd6f7; --accent: #a6b1e1; --glow: rgba(166, 177, 225, 0.4);
+            --bg-top: #424874; --bg-mid: #2d3250; --bg-low: #1e1e2e; --bg-bottom: #0f0f1b;
+            --panel-bg: rgba(45, 50, 80, 0.9);
+        }
+        [data-theme="nordic-snow"] {
+            --text: #4c566a; --accent: #88c0d0; --glow: rgba(136, 192, 208, 0.4);
+            --bg-top: #eceff4; --bg-mid: #e5e9f0; --bg-low: #d8dee9; --bg-bottom: #c0c4cc;
+            --panel-bg: rgba(236, 239, 244, 0.95);
+        }
+        [data-theme="forest-earth"] {
+            --text: #f0ead6; --accent: #a3be8c; --glow: rgba(163, 190, 140, 0.4);
+            --bg-top: #3b4252; --bg-mid: #2e3440; --bg-low: #1a1c23; --bg-bottom: #0d0f14;
+            --panel-bg: rgba(46, 52, 64, 0.9);
+        }
+        [data-theme="royal-purple"] {
+            --text: #e0afff; --accent: #a855f7; --glow: rgba(168, 85, 247, 0.5);
+            --bg-top: #4a148c; --bg-mid: #311b92; --bg-low: #1a0633; --bg-bottom: #05010a;
+            --panel-bg: rgba(26, 6, 51, 0.9);
+        }
+        [data-theme="wii"] {
+            --text: #444; --accent: #2db4ff; --glow: rgba(45, 180, 255, 0.4);
+            --bg-top: transparent; --bg-mid: transparent; --bg-low: transparent; --bg-bottom: #e7e7e7;
+            --panel-bg: rgba(255, 255, 255, 0.9);
+        }
+        [data-theme="wii"] body::before {
+            background: url('wii.png') no-repeat center center fixed !important;
+            background-size: cover !important;
+        }
+
+        /* NEW: CRYPTIC THEME */
+        [data-theme="cryptic"] {
+            --text: #00ff41; --accent: #00ff41; --glow: rgba(0, 255, 65, 0.4);
+            --bg-top: #1a0033; --bg-mid: #0d001a; --bg-low: #05000d; --bg-bottom: #000000;
+            --panel-bg: rgba(10, 0, 20, 0.95);
+        }
+
+        /* NEW: GD BACKGROUND THEME */
+        [data-theme="gd"] {
+            --text: #ffffff; --accent: #2efdff; --glow: rgba(46, 253, 255, 0.6);
+            --bg-top: transparent; --bg-mid: transparent; --bg-low: transparent; --bg-bottom: #000;
+            --panel-bg: rgba(0, 0, 0, 0.85);
+        }
+        [data-theme="gd"] body::before {
+            background: url('gd.png') no-repeat center center fixed !important;
+            background-size: cover !important;
+        }
+
+        /* ================= BASE STYLES ================= */
+        * { box-sizing: border-box; outline: none; }
+        body { margin: 0; font-family: 'BBH Bartle', sans-serif; color: var(--text); background: var(--bg-bottom); overflow-x: hidden; transition: 0.5s ease; min-height: 100vh; }
+        #galaxyCanvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; transition: opacity 1s ease; }
+        body::before { content: ''; position: fixed; inset: 0; z-index: -2; background: radial-gradient(circle at 50% 12%, rgba(255,255,255,0.05), transparent 55%), linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 30%, var(--bg-low) 65%, var(--bg-bottom) 100%); transition: 0.8s ease; }
+
+        .status-bar { position: fixed; top: 15px; left: 30px; display: flex; gap: 10px; z-index: 1001; }
+        .status-item { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(15px); padding: 8px 16px; border-radius: 30px; font-size: 0.8em; font-weight: 600; color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+
+        header { display: flex; justify-content: space-between; align-items: center; padding: 70px 40px 20px; position: relative; z-index: 1002; }
+        .logo { font-size: 2.2em; font-weight: 600; letter-spacing: 4px; text-shadow: 0 0 20px var(--glow); }
+
+        .nav-pill { display: flex; background: rgba(0, 0, 0, 0.4); padding: 5px; border-radius: 50px; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        .nav-link { padding: 12px 30px; border-radius: 50px; cursor: pointer; transition: 0.3s; opacity: 0.5; font-size: 0.9em; font-weight: bold; }
+        .nav-link.active { background: var(--accent); color: #000; opacity: 1; box-shadow: 0 0 20px var(--glow); }
+
+        /* ================= VIEW TRANSITIONS ================= */
+        main, section { 
+            width: 100%; position: absolute; top: 160px; 
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.6s ease;
+        }
+        .view-hidden { opacity: 0; pointer-events: none; transform: translateY(30px); }
+        .view-active { opacity: 1; transform: translateY(0); }
+
+        /* ================= SEARCH & GRID ================= */
+        .section-label { padding: 0 40px 15px; font-size: 0.9em; font-weight: bold; letter-spacing: 2px; color: var(--accent); opacity: 0.8; }
+        .search-container { padding: 10px 40px 30px; display: flex; flex-direction: column; gap: 10px; }
+        .game-count { font-size: 1.1em; font-weight: 600; letter-spacing: 1px; text-shadow: 0 0 15px var(--glow); color: var(--accent); text-transform: uppercase; }
+        .search-input { width: 320px; padding: 16px 24px; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 20px; color: #fff; font-family: 'BBH Bartle'; transition: 0.3s; }
+        .search-input:focus { width: 480px; border-color: var(--accent); box-shadow: 0 0 30px var(--glow); }
+
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); grid-auto-rows: 140px; gap: 20px; padding: 0 40px 60px; }
+        .game-card { position: relative; border-radius: 24px; overflow: hidden; background: #000; cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; translate: 0 40px; }
+        .game-card.visible { opacity: 1; translate: 0 0; } 
+        .game-card.large { grid-column: span 2; grid-row: span 2; }
+        .game-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; }
+        .game-card:hover { transform: scale(1.05) translateY(-8px); z-index: 10; box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 25px var(--glow); }
+        
+        /* FAVORITE STAR BUTTON */
+        .fav-btn {
+            position: absolute; top: 12px; right: 12px; z-index: 50;
+            background: rgba(0,0,0,0.8); width: 34px; height: 34px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; border: 1px solid rgba(255,255,255,0.3);
+            font-size: 1.2em; transition: 0.3s; cursor: pointer;
+        }
+        .fav-btn:hover { transform: scale(1.2); color: #ffd700; border-color: #ffd700; }
+        .game-card.is-fav .fav-btn { color: #ffd700; border-color: #ffd700; background: rgba(0,0,0,0.9); }
+
+        /* Shine Animation */
+        @keyframes goldShine {
+            0% { box-shadow: 0 0 0px #ffd700; }
+            50% { box-shadow: 0 0 50px #ffd700; transform: scale(1.1); }
+            100% { box-shadow: 0 0 0px #ffd700; }
+        }
+        .shining { animation: goldShine 0.8s ease-out; z-index: 100; }
+/* Shine effect overlay */
+.game-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+        to right,
+        transparent 0%,
+        rgba(255, 215, 0, 0.4) 50%,
+        transparent 100%
+    );
+    transform: skewX(-25deg);
+    transition: none;
+    pointer-events: none;
+}
+
+/* The animation trigger */
+.game-card.shining::after {
+    animation: sweep 0.8s ease-on-out;
+}
+
+@keyframes sweep {
+    0% { left: -150%; }
+    100% { left: 150%; }
+}
+        .card-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 20px 15px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); opacity: 0; transition: 0.3s; }
+        .game-card:hover .card-info, .game-card.large .card-info { opacity: 1; }
+        .game-title { color: #fff; font-weight: 600; text-transform: uppercase; font-size: 0.65em; letter-spacing: 0.8px; text-align: center; }
+
+        /* ================= SETTINGS ================= */
+        .settings-box { background: var(--panel-bg); padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.15); max-width: 700px; margin: 0 auto 100px; }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        
+        .theme-grid { display: flex; gap: 12px; margin-top: 15px; flex-wrap: wrap; align-items: center; }
+        .theme-circle { width: 50px; height: 50px; border-radius: 50%; cursor: pointer; border: 4px solid transparent; transition: 0.3s; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .theme-circle.active { border-color: #fff; box-shadow: 0 0 25px var(--glow); transform: scale(1.1); }
+        .wii-icon { background: #fff url('wii.png') no-repeat center; background-size: cover; }
+        .gd-icon { background: url('gd.png') center; background-size: cover; }
+        .cryptic-icon { background: #1a0033; border: 2px solid #00ff41; color: #00ff41; font-weight: bold; font-size: 0.6em; }
+
+        /* Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        .btn-cloak { width: 100%; padding: 18px; margin-top: 25px; background: var(--accent); color: #000; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; font-family: 'BBH Bartle'; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 8px 0px rgba(0,0,0,0.2); }
+        .btn-cloak:hover { transform: translateY(-5px); box-shadow: 0 15px 25px var(--glow); }
+    </style>
+</head>
+<body>
+    <canvas id="galaxyCanvas"></canvas>
+    
+    <div class="status-bar">
+        <div class="status-item" id="time">00:00</div>
+        <div class="status-item" id="ip">LOCATING...</div>
+        <div class="status-item" id="country">WORLDWIDE</div>
+    </div>
+
+    <header>
+        <div class="logo">ASTATINE</div>
+        <div class="nav-pill">
+            <div class="nav-link active" onclick="showTab('games')">GAMES</div>
+            <div class="nav-link" onclick="showTab('settings')">SETTINGS</div>
+        </div>
+    </header>
+
+    <main id="gamesView" class="view-active">
+        <div class="search-container">
+            <div class="game-count" id="gameCountText">Play our __ games!</div>
+            <input type="text" class="search-input" id="search" placeholder="SEARCH LIBRARY...">
+        </div>
+
+        <div id="fav-section">
+            <div class="section-label" id="fav-label" style="display:none">PINNED FAVORITES</div>
+            <div class="grid-container" id="fav-grid"></div>
+        </div>
+
+        <div class="section-label">ALL GAMES</div>
+        <div class="grid-container" id="grid"></div>
+    </main>
+
+    <section id="settingsView" class="view-hidden">
+        <div class="settings-box">
+            <h2 style="margin-top:0">PREFERENCES</h2>
+            <div class="setting-row">
+                <span>Background Particles</span>
+                <label class="switch">
+                    <input type="checkbox" id="particleToggle" checked onclick="toggleParticles()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <h2 style="margin-top:20px">THEMES</h2>
+            <div class="theme-grid">
+                <div class="theme-circle" data-t="default" style="background: #3fb7ff;" onclick="changeTheme('default')"></div>
+                <div class="theme-circle" data-t="dark" style="background: #444;" onclick="changeTheme('dark')"></div>
+                <div class="theme-circle" data-t="midnight-pale" style="background: #a6b1e1;" onclick="changeTheme('midnight-pale')"></div>
+                <div class="theme-circle" data-t="nordic-snow" style="background: #88c0d0;" onclick="changeTheme('nordic-snow')"></div>
+                <div class="theme-circle" data-t="forest-earth" style="background: #a3be8c;" onclick="changeTheme('forest-earth')"></div>
+                <div class="theme-circle" data-t="royal-purple" style="background: #a855f7;" onclick="changeTheme('royal-purple')"></div>
+                <div class="theme-circle cryptic-icon" data-t="cryptic" onclick="changeTheme('cryptic')">0101</div>
+                <div class="theme-circle gd-icon" data-t="gd" onclick="changeTheme('gd')"></div>
+                <div class="theme-circle wii-icon" data-t="wii" onclick="changeTheme('wii')"></div>
+                <div class="color-picker-wrapper theme-circle" id="customThemeCircle" data-t="custom" style="background: linear-gradient(45deg, red, blue);">
+                    <input type="color" id="userColor" oninput="applyCustomColor(this.value)">
+                </div>
+            </div>
+
+            <button class="btn-cloak" style="margin-top:40px;" onclick="cloakPage()">CLOAK TO ABOUT:BLANK</button>
+        </div>
+    </section>
+
+    <script>
+        const featuredNames = ['Drive Mad', 'Clash Royale', 'Retro Bowl', 'Drift Hunters', 'Eaglercraft Launcher'];
+        const games = [
+            { name: 'Among Us', img: 'amongus/amogus.png', link: 'amongus/amongus.html' },
+            { name: 'Andys Apple Farm', img: 'aaf/aaf.png', link: 'aaf/aaf.html' },
+            { name: 'Backrooms', img: 'backrooms/brooms.png', link: 'backrooms/backrooms.html' },
+            { name: 'Baldis Basics Classic Remastered', img: 'baldiremaster/bbcr.png', link: 'baldiremaster/baldiremaster.html' },
+            { name: 'Baldis Basics Plus', img: 'baldiplus/bbplus.png', link: 'baldiplus/baldiplus.html' },
+            { name: 'Basketball Stars', img: 'baskstars/bstars.png', link: 'baskstars/baskstars.html' },
+            { name: 'Bendy and the Ink Machine', img: 'bendy/batim.png', link: 'bendy/bendy.html' },
+            { name: 'Bitlife', img: 'bitlife/bitlife.png', link: 'bitlife/bitlife.html' },
+            { name: 'Block Blast - who plays ts 🥀💔', img: 'blockblast/bbla.png', link: 'blockblast/blockblast.html' },
+            { name: 'Boxing Random', img: 'boxrando/boxrando.png', link: 'boxrando/boxrando.html' },
+            { name: 'Clash Royale', img: 'clash/clash.png', link: 'clash/clash.html' },
+            { name: 'Cookie Clicker', img: 'cclicker/cclicker.png', link: 'cclicker/cclicker.html' },
+            { name: 'CrazyCattle3D aka Peak', img: 'holypeak/ccaddle.png', link: 'holypeak/holypeak.html' },
+            { name: 'Crossy Road', img: 'crossyroad/crossyroad.png', link: 'crossyroad/crossyroad.html' },
+            { name: 'Cuphead', img: 'cuphead/cuphead.png', link: 'cuphead/cuphead.html' },
+            { name: 'Deltarune', img: 'deltarune/deltarune.png', link: 'deltarune/deltarune.html' },
+            { name: 'Doge Miner', img: 'dogeminer/dm.png', link: 'dogeminer/dm.html' },
+            { name: 'Doodle Baseball', img: 'gbaseball/gbaseball.png', link: 'gbaseball/gbaseball.html' },
+            { name: 'Doodle Jump', img: 'doodlejump/doodlej.png', link: 'doodlejump/doodlej.html' },
+            { name: 'Drive Mad', img: 'drivemad/drivemad.png', link: 'drivemad/drivemad.html' },
+            { name: 'DXRT Flash Emulator', img: 'dxrtemu/dxrt-emu.png', link: 'dxrtemu/dxrtemu.html' },
+            { name: 'Eaglercraft Launcher', img: 'eaglercraft1.12/eag1.12.png', link: 'mclauncher.html' },
+            { name: 'Fancypants Adventure', img: 'fancypants/fancypants1.png', link: 'fancypants/fancypants.html' },
+            { name: 'Fancypants Adventure 2', img: 'fpants2/fpants2.png', link: 'fpants2/fpants2.html' },
+            { name: 'Fancypants Adventure 3', img: 'fpants3/fpants3.png', link: 'fpants3/fpants3.html' },
+            { name: 'Fears to Fathom : Home Alone', img: 'f2f/ff2f.png', link: 'f2f/f2f.html' },
+            { name: 'Fireboy & Watergirl', img: 'fireb/fireb.png', link: 'fireb/fireb.html' },
+            { name: 'FNAF World', img: 'fnafworld/fnafworld.png', link: 'fnafworld/fnafworld.html' },
+            { name: 'FNAF1', img: 'fnaf1/fnaf1.png', link: 'fnaf1/fnaf1.html' },
+            { name: 'FNAF2', img: 'fnaf2/fnaf2.png', link: 'fnaf2/fnaf2.html' },
+            { name: 'FNAF3', img: 'fnaf3/fnaf3.png', link: 'fnaf3/fnaf3.html' },
+            { name: 'FNAF4', img: 'fnaf4/fnaf4.png', link: 'fnaf4/fnaf4.html' },
+            { name: 'FNAF5 - SL', img: 'sl/sl.png', link: 'sl/sl.html' },
+            { name: 'Football Bros', img: 'fb/fb.png', link: 'fb/fb.html' },
+            { name: 'Fork and Sausage', img: 'fas/fas.png', link: 'fas/fas.html' },
+            { name: 'Friday Night Funkin', img: 'fnf/fnf.png', link: 'fnf/fnf.html' },
+            { name: 'Geometry Dash Lite', img: 'geomdashlite/geomdashlite.png', link: 'geomdashlite/geomdashlite.html' },
+            { name: 'Gimme the AirPod', img: 'gimme/gimme.png', link: 'gimme/gimme.html' },
+            { name: 'Granny', img: 'granny/granny.png', link: 'granny/granny.html' },
+            { name: 'Grow a Garden', img: 'gag/gag.png', link: 'gag/gag.html' },
+            { name: 'Gun Mayhem', img: 'gunmay/gm.png', link: 'gunmay/gm.html' },
+            { name: 'Gun Mayhem 2', img: 'gunmay2/gm2.png', link: 'gunmay2/gm2.html' },
+            { name: 'Half Life', img: 'hl/hl.png', link: 'hl/hl.html' },
+            { name: 'Happy Wheels', img: 'hw/hw.png', link: 'hw/hw.html' },
+            { name: 'Henry Stickmin - Breaking the Bank', img: 'btb/btb.png', link: 'btb/btb.html' },
+            { name: 'Henry Stickmin: Escaping the Prison', img: 'etp/etp.png', link: 'etp/etp.html' },
+            { name: 'Henry Stickmin: Fleeing the Complex', img: 'ftc/ftc.png', link: 'ftc/ftc.html' },
+            { name: 'Hill Climb Racing', img: 'hillclimb/hillc.png', link: 'hillclimb/hillc.html' },
+            { name: 'hole.io', img: 'holeio/holeio.png', link: 'holeio/holeio.html' },
+            { name: 'Idle Breakout', img: 'idle/idle.png', link: 'idle/idle.html' },
+            { name: 'Mike Tysons Punch-Out!!', img: 'mtpo/mtpo.png', link: 'mtpo/mtpo.html' },
+            { name: 'Monster Tracks', img: 'mtracks/mtracks.png', link: 'mtracks/mtracks.html' },
+            { name: 'Moto 3XM', img: 'm3x/m3x.png', link: 'm3x/m3x.html' },
+            { name: 'OvO', img: 'ovo/ovo.png', link: 'ovo/ovo.html' },
+            { name: 'Papas Pizzeria', img: 'papapizzeria/papapizzeria.png', link: 'papapizzeria/papapizzeria.html' },
+            { name: 'PaRappa the Rapper', img: 'ptr/parappa.png', link: 'ptr/parappa.html' },
+            { name: 'Ruffle', img: 're/re.png', link: 're/re.html' },
+            { name: 'Wordle', img: 'w/w.png', link: 'w/w.html' },
+            { name: 'We Become What We Behold', img: 'wb/wb.png', link: 'wb/wb.html' },
+            { name: 'EmulatorJS', img: 'emjs/emjs.png', link: 'emjs/emjs.html' },
+            { name: 'People Playground', img: 'pplplayground/pplplayground.png', link: 'pplplayground/pplplayground.html' },
+            { name: 'Slope', img: 'slope/slope.png', link: 'slope/slope.html' },
+            { name: 'Subway Surfers', img: 'subsurf/ss.png', link: 'subsurf/subsurf.html' },
+            { name: 'Time Shooter 3', img: 'ts3/ts3.png', link: 'ts3/ts3.html' },
+            { name: 'Slope 2', img: 'slope2/s2.png', link: 'slope2/s2.html' },
+            { name: 'Duke Nukem 3D', img: 'duke3d/duke3d.png', link: 'duke3d/duke3d.html' },
+            { name: 'Slope 3', img: 'slope3/s3.png', link: 'slope3/s3.html' },
+            { name: 'Tomb of the Mask', img: 'totm/totm.png', link: 'totm/totm.html' },
+            { name: 'Duck Hunt', img: 'duckhunt/duckhunt.png', link: 'duckhunt/duckhunt.html' },
+            { name: 'Retro Bowl', img: 'retrobowl/retrobowl.png', link: 'retrobowl/retrobowl.html' },
+            { name: 'Retro Bowl College', img: 'rbcollege/rbc.png', link: 'rbcollege/rbc.html' },
+            { name: 'Doom', img: 'doom/doom.png', link: 'doom/dos.html' },
+            { name: 'Baseball Bros', img: 'bb/bb.png', link: 'bb/bb.html' },
+            { name: 'My Friend Pedro', img: 'pedro/a.png', link: 'pedro/pedro.html' },
+            { name: 'A Small World Cup', img: 'swc/swc.png', link: 'swc/swc.html' },
+            { name: 'Backrooms 2D', img: 'backrooms2d/backrooms2d.png', link: 'backrooms2d/back3d.html' },
+            { name: 'Bad Parenting', img: 'badparenting/bp.png', link: 'badparenting/bp.html' },
+{ name: 'Arthurs Nightmare', img: 'arthursnight/an.png', link: 'arthursnight/an.html' },
+{ name: 'Drift Hunters', img: 'drift/drift.png', link: 'drift/drift.html' },
+{ name: 'FNAF UCN', img: 'ucn/ucn.png', link: 'ucn/ucn.html' },
+        ];
+games.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+
+        let favoriteIds = JSON.parse(localStorage.getItem('astatine-favs') || '[]');
+
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+
+      function toggleFav(e, name) {
+    e.stopPropagation();
+    const card = e.currentTarget.closest('.game-card');
+    
+    if (favoriteIds.includes(name)) {
+        favoriteIds = favoriteIds.filter(id => id !== name);
+        localStorage.setItem('astatine-favs', JSON.stringify(favoriteIds));
+        render(document.getElementById('search').value);
+    } else {
+        favoriteIds.push(name);
+        localStorage.setItem('astatine-favs', JSON.stringify(favoriteIds));
+        
+        // Trigger the animation
+        card.classList.add('shining');
+        
+        // Wait for animation to finish before moving the card to the favorites section
+        setTimeout(() => {
+            card.classList.remove('shining');
+            render(document.getElementById('search').value);
+        }, 800); 
+    }
+}
+
+        function createCard(game, isFav) {
+            const isFeatured = featuredNames.includes(game.name);
+            const card = document.createElement('div');
+            card.className = `game-card ${isFeatured ? 'large' : ''} ${isFav ? 'is-fav' : ''}`;
+            card.innerHTML = `
+                <div class="fav-btn" onclick="toggleFav(event, '${game.name}')">★</div>
+                <img src="${game.img}">
+                <div class="card-info"><div class="game-title">${game.name}</div></div>
+            `;
+            card.onclick = () => location.href = game.link;
+            return card;
+        }
+
+        function render(filter = '') {
+            const mainGrid = document.getElementById('grid');
+            const favGrid = document.getElementById('fav-grid');
+            const favLabel = document.getElementById('fav-label');
+            mainGrid.innerHTML = ''; favGrid.innerHTML = '';
+
+            const filtered = games.filter(g => g.name.toLowerCase().includes(filter.toLowerCase()));
+            document.getElementById('gameCountText').innerText = `Play our ${games.length} games!`;
+
+            const favGames = filtered.filter(g => favoriteIds.includes(g.name));
+            const otherGames = filtered.filter(g => !favoriteIds.includes(g.name));
+
+            favLabel.style.display = favGames.length > 0 ? 'block' : 'none';
+            favGames.forEach(g => { const c = createCard(g, true); favGrid.appendChild(c); scrollObserver.observe(c); });
+            otherGames.forEach(g => { const c = createCard(g, false); mainGrid.appendChild(c); scrollObserver.observe(c); });
+        }
+
+        // --- THEME LOGIC ---
+        function applyCustomColor(hex) {
+            changeTheme('custom');
+            document.documentElement.style.setProperty('--accent', hex);
+            document.documentElement.style.setProperty('--glow', hex + '80');
+            document.getElementById('customThemeCircle').style.background = hex;
+            localStorage.setItem('astatine-custom-hex', hex);
+        }
+
+        function changeTheme(theme) {
+            document.documentElement.style.removeProperty('--accent');
+            document.documentElement.style.removeProperty('--glow');
+            if (theme === 'default') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', theme);
+            
+            localStorage.setItem('astatine-theme', theme);
+            document.querySelectorAll('.theme-circle').forEach(c => c.classList.toggle('active', c.getAttribute('data-t') === theme));
+            document.getElementById('galaxyCanvas').style.display = (theme === 'wii' || theme === 'gd') ? 'none' : 'block';
+
+            if (theme === 'custom') {
+                const savedHex = localStorage.getItem('astatine-custom-hex') || '#ffffff';
+                applyCustomColor(savedHex);
+            }
+        }
+
+        // --- VIEW NAVIGATION ---
+        function showTab(tab) {
+            const gView = document.getElementById('gamesView');
+            const sView = document.getElementById('settingsView');
+            if (tab === 'games') { gView.className = 'view-active'; sView.className = 'view-hidden'; }
+            else { gView.className = 'view-hidden'; sView.className = 'view-active'; }
+            document.querySelectorAll('.nav-link').forEach((l, i) => l.classList.toggle('active', (tab === 'games' && i === 0) || (tab === 'settings' && i === 1)));
+        }
+
+        // --- PARTICLE LOGIC ---
+        const canvas = document.getElementById('galaxyCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let particlesEnabled = localStorage.getItem('astatine-particles') !== 'false';
+
+        function toggleParticles() {
+            particlesEnabled = document.getElementById('particleToggle').checked;
+            localStorage.setItem('astatine-particles', particlesEnabled);
+            canvas.style.opacity = particlesEnabled ? "1" : "0";
+        }
+
+        class Particle {
+            constructor() { this.init(); }
+            init() {
+                this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 0.7 + 0.1; this.speedX = (Math.random() - 0.5) * 0.2;
+                this.speedY = (Math.random() - 0.5) * 0.2; this.alpha = Math.random() * 0.5;
+            }
+            update() { this.x += this.speedX; this.y += this.speedY; if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.init(); }
+            draw() { 
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent'); 
+                ctx.globalAlpha = this.alpha; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); 
+            }
+        }
+        function initParticles() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; for(let i=0; i<250; i++) particles.push(new Particle()); }
+        function animate() { 
+            if (particlesEnabled) {
+                ctx.clearRect(0,0,canvas.width,canvas.height); 
+                particles.forEach(p => { p.update(); p.draw(); }); 
+            }
+            requestAnimationFrame(animate); 
+        }
+
+        // --- UTILS ---
+        async function fetchStatus() {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                document.getElementById('ip').innerText = data.ip;
+                document.getElementById('country').innerText = data.country_name.toUpperCase();
+            } catch (e) {
+                document.getElementById('ip').innerText = "3.1";
+                document.getElementById('country').innerText = "ONLINE";
+            }
+        }
+
+        function cloakPage() {
+            const win = window.open();
+            const url = window.location.href;
+            const iframe = win.document.createElement('iframe');
+            iframe.style.width = "100%"; iframe.style.height = "100%"; iframe.style.border = "none";
+            iframe.src = url;
+            win.document.body.style.margin = "0"; win.document.body.appendChild(iframe);
+            window.location.replace("https://google.com");
+        }
+
+        // --- INIT ---
+        window.addEventListener('resize', initParticles);
+        initParticles(); animate(); fetchStatus();
+        setInterval(() => { document.getElementById('time').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
+        document.getElementById('search').addEventListener('input', (e) => render(e.target.value));
+        
+        document.getElementById('particleToggle').checked = particlesEnabled;
+        canvas.style.opacity = particlesEnabled ? "1" : "0";
+
+        changeTheme(localStorage.getItem('astatine-theme') || 'default');
+        render();
+    </script>
+</body>
+</html>
