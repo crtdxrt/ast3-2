@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DXRT Flash</title>
+<link rel="icon" type="image/png" href="A.png">
+
+<link href="https://fonts.googleapis.com/css2?family=BBH+Bartle:wght@400;600&display=swap" rel="stylesheet">
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const theme = urlParams.get('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', theme);
+</script>
+
+<style>
+/* =====================
+   BASE VARIABLES
+   ===================== */
+:root {
+  --text: #e6ffe6;
+  --accent: #6dff9c;
+  --glow: rgba(109, 255, 156, 0.45);
+
+  --panel-bg: rgba(12, 14, 16, 0.75);
+  --panel-border: rgba(255,255,255,0.12);
+}
+
+/* =====================
+   RESET
+   ===================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* =====================
+   BODY + STARFIELD
+   ===================== */
+body {
+  font-family: 'BBH Bartle', sans-serif;
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: black;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+/* Small stars */
+body::before {
+  background:
+    radial-gradient(1px 1px at 10% 20%, #fff, transparent),
+    radial-gradient(1px 1px at 30% 80%, #aaa, transparent),
+    radial-gradient(1px 1px at 70% 40%, #fff, transparent),
+    radial-gradient(1px 1px at 90% 10%, #bbb, transparent),
+    radial-gradient(1px 1px at 50% 60%, #888, transparent);
+  opacity: 0.35;
+}
+
+/* =====================
+   MAIN PANEL
+   ===================== */
+#emulator {
+  padding: 32px 40px;
+  border-radius: 24px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--panel-border);
+  box-shadow:
+    0 25px 70px rgba(0,0,0,0.9),
+    0 0 25px var(--glow);
+  text-align: center;
+  max-width: 720px;
+  width: 90%;
+}
+
+/* =====================
+   TITLE
+   ===================== */
+#emulator h2 {
+  font-size: 2em;
+  margin-bottom: 22px;
+  color: var(--text);
+  text-shadow: 0 0 12px var(--glow);
+}
+
+/* =====================
+   FILE INPUT
+   ===================== */
+.file-upload-wrapper {
+  margin-bottom: 24px;
+}
+
+input[type="file"] {
+  width: 240px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  transition: 0.3s;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+  display: none;
+}
+
+input[type="file"]:hover {
+  background: rgba(30,30,30,0.8);
+  box-shadow: 0 0 18px var(--glow);
+}
+
+/* =====================
+   PLAYER
+   ===================== */
+#player-container {
+  position: relative;
+  max-width: 640px;
+  margin: auto;
+}
+
+#player {
+  width: 100%;
+  height: 480px;
+  border-radius: 18px;
+  background: rgba(0,0,0,0.65);
+  border: 1px solid var(--panel-border);
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.9);
+}
+
+/* =====================
+   FULLSCREEN BUTTON
+   ===================== */
+#fullscreen-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.6);
+  color: var(--text);
+  font-size: 1.3em;
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--glow);
+  transition: 0.25s;
+}
+
+#fullscreen-btn:hover {
+  background: var(--accent);
+  color: black;
+  transform: scale(1.1);
+}
+</style>
+
+<script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+</head>
+
+<body>
+
+<div id="emulator">
+  <h2>DXRT'S Flash Emulator</h2>
+
+  <div class="file-upload-wrapper">
+    <input type="file" id="fileInput" accept=".swf">
+  </div>
+
+  <div id="player-container">
+    <div id="player"></div>
+    <button id="fullscreen-btn" title="Fullscreen">⛶</button>
+  </div>
+</div>
+
+<script>
+const ruffle = window.RufflePlayer.newest();
+const player = ruffle.createPlayer();
+document.getElementById("player").appendChild(player);
+
+document.getElementById("fileInput").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (file) {
+    player.load({ url: URL.createObjectURL(file) });
+  }
+});
+
+document.getElementById("fullscreen-btn").onclick = () => {
+  const el = document.getElementById("player-container");
+  el.requestFullscreen?.() ||
+  el.webkitRequestFullscreen?.() ||
+  el.msRequestFullscreen?.();
+};
+</script>
+
+</body>
+</html>
