@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PaRappa the Rapper - Ultimate Game Stash</title>
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000;
+            height: 100%;
+            width: 100%;
+        }
+
+        #game {
+            width: 100vw;
+            height: 100vh;
+            display: none;
+        }
+
+        #startButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 60px;
+            background: #4CAF50;
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 0 20px #000;
+            z-index: 10;
+        }
+
+        #startButton:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game"></div>
+    <button id="startButton">PLAY</button>
+
+    <script>
+        const startButton = document.getElementById("startButton");
+        const gameDiv = document.getElementById("game");
+
+        startButton.addEventListener("click", startGame);
+
+        function startGame() {
+            startButton.style.display = "none";
+            gameDiv.style.display = "block";
+
+            // EmulatorJS config
+            window.EJS_player = "#game";
+            window.EJS_core = "psx";
+            window.EJS_pathtodata = "https://cdn.jsdelivr.net/gh/a456pur/seraph@81f551ca0aa8e3d6018d32d8ac5904ac9bc78f76/storage/emulatorjs/data/";
+            window.EJS_gameUrl = "https://bbcdn.githack.com/johnbones/john/raw/main/PaRappa%20the%20Rapper%20(USA)%20(En,Fr,De,Es,It).zip";
+            window.EJS_startOnLoaded = true;
+            window.EJS_color = "#000000";
+
+            // Load emulator scripts
+            const loader = document.createElement("script");
+            loader.src = "https://cdn.jsdelivr.net/gh/a456pur/seraph@81f551ca0aa8e3d6018d32d8ac5904ac9bc78f76/storage/emulatorjs/data/loader.js";
+            document.body.appendChild(loader);
+
+            // optional cloak script (if you still want it)
+            const cloak = document.createElement("script");
+            cloak.src = "https://cdn.jsdelivr.net/gh/a456pur/seraph@ae2fcc6d6a9cd051654fcc0519080db1f79cf2a7/storage/js/cloak.js";
+            document.body.appendChild(cloak);
+        }
+    </script>
+</body>
+</html>
